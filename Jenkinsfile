@@ -28,6 +28,13 @@ pipeline {
             }
         }
     }
+stage('Code Quality Check') {
+    steps {
+        sh 'python3 -m venv .venv'
+        sh '.venv/bin/python -m pip install -r requirements-dev.txt'
+        sh '.venv/bin/ruff check train.py test_model.py'
+    }
+}
 
     post {
         success {
