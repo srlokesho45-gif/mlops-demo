@@ -22,5 +22,5 @@ with open("model.json", "w") as file:
     json.dump(model, file)
 
 prediction = slope * 6 + intercept
-print(f"Model trained successfully!")
+print("Model trained successfully!")
 print(f"Predicted marks for 6 hours: {prediction:.1f}")
