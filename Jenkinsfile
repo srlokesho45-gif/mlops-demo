@@ -50,6 +50,14 @@ pipeline {
             }
         }
 
+stage('Compare Experiments') {
+    steps {
+        sh 'python3 compare_experiments.py'
+        sh 'python3 -m unittest -v test_compare_experiments.py'
+    }
+}
+
+
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t mlops-demo:v3 .'
@@ -70,14 +78,12 @@ pipeline {
     }
 
     post {
-        success {
-            archiveArtifacts artifacts: 'model.json,model_version.json,metrics.json,experiments.jsonl',
-                fingerprint: true
-            echo 'SUCCESS: MLOps pipeline, evaluation, and experiment tracking completed!'
-        }
-        failure {
-            echo 'FAILED: Check Console Output.'
-        }
+    success {
+        archiveArtifacts artifacts: 'model.json,model_version.json,metrics.json,experiments.jsonl', fingerprint: true
+        echo 'SUCCESS: MLOps pipeline completed!'
+    }
+    failure {
+        echo 'FAILED: Check Console Output.'
     }
 }
 
