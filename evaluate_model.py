@@ -2,7 +2,6 @@
 import json
 import math
 from datetime import datetime, timezone
-from pathlib import Path
 
 actual = [20, 30, 40, 50, 60]
 hours = [1, 2, 3, 4, 5]
