@@ -38,6 +38,13 @@ metrics = {
     "mse": round(mse, 4),
     "r2": round(r2, 4),
 }
+if metrics["mae"] > 5:
+    raise ValueError("Model failed: MAE is greater than 5")
+
+if metrics["r2"] < 0.90:
+    raise ValueError("Model failed: R2 is below 0.90")
+
+print("Model quality gate passed!")
 
 with open("metrics.json", "w", encoding="utf-8") as file:
     json.dump(metrics, file, indent=2)
