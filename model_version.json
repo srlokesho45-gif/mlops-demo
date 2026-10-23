@@ -1,0 +1,8 @@
+
+{
+  "model_name": "student-marks-predictor",
+  "version": "1.0",
+  "algorithm": "Linear Regression",
+  "slope": 10.0,
+  "intercept": 10.0
+}
