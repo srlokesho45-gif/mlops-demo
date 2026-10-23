@@ -6,16 +6,13 @@ pipeline {
         stage('Check Tools') {
             steps {
                 sh 'python3 --version'
-                sh 'git --version'
                 sh 'docker --version'
             }
         }
 
         stage('Code Quality Check') {
             steps {
-                sh 'python3 -m venv .venv'
-                sh '.venv/bin/python -m pip install -r requirements-dev.txt'
-                sh '.venv/bin/ruff check train.py test_model.py evaluate_model.py test_evaluation.py'
+                sh '.venv/bin/ruff check train.py test_model.py evaluate_model.py test_evaluation.py compare_experiments.py test_compare_experiments.py'
             }
         }
 
@@ -50,13 +47,12 @@ pipeline {
             }
         }
 
-stage('Compare Experiments') {
-    steps {
-        sh 'python3 compare_experiments.py'
-        sh 'python3 -m unittest -v test_compare_experiments.py'
-    }
-}
-
+        stage('Compare Experiments') {
+            steps {
+                sh 'python3 compare_experiments.py'
+                sh 'python3 -m unittest -v test_compare_experiments.py'
+            }
+        }
 
         stage('Build Docker Image') {
             steps {
@@ -78,12 +74,13 @@ stage('Compare Experiments') {
     }
 
     post {
-    success {
-        archiveArtifacts artifacts: 'model.json,model_version.json,metrics.json,experiments.jsonl', fingerprint: true
-        echo 'SUCCESS: MLOps pipeline completed!'
-    }
-    failure {
-        echo 'FAILED: Check Console Output.'
+        success {
+            archiveArtifacts artifacts: 'model.json,model_version.json,metrics.json,experiments.jsonl,experiment_report.json', fingerprint: true
+            echo 'SUCCESS: MLOps pipeline, evaluation, and experiment tracking completed!'
+        }
+
+        failure {
+            echo 'FAILED: Check Console Output.'
+        }
     }
 }
-
