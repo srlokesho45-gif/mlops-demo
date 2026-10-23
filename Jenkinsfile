@@ -15,7 +15,13 @@ pipeline {
             steps {
                 sh 'python3 -m venv .venv'
                 sh '.venv/bin/python -m pip install -r requirements-dev.txt'
-                sh '.venv/bin/ruff check train.py test_model.py'
+                sh '.venv/bin/ruff check train.py test_model.py evaluate_model.py test_evaluation.py'
+            }
+        }
+
+        stage('Validate Model Metadata') {
+            steps {
+                sh 'python3 -m json.tool model_version.json'
             }
         }
 
@@ -31,25 +37,47 @@ pipeline {
             }
         }
 
+        stage('Evaluate Model') {
+            steps {
+                sh 'python3 evaluate_model.py'
+                sh 'python3 -m json.tool metrics.json'
+            }
+        }
+
+        stage('Test Evaluation') {
+            steps {
+                sh 'python3 -m unittest -v test_evaluation.py'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t mlops-demo:v1 .'
+                sh 'docker build -t mlops-demo:v3 .'
+            }
+        }
+
+        stage('Verify Model Metadata in Docker') {
+            steps {
+                sh 'docker run --rm --entrypoint cat mlops-demo:v3 /app/model_version.json'
             }
         }
 
         stage('Test Docker Container') {
             steps {
-                sh 'docker run --rm mlops-demo:v1'
+                sh 'docker run --rm mlops-demo:v3'
             }
         }
     }
 
     post {
         success {
-            echo 'SUCCESS: ML tests and Docker pipeline completed!'
+            archiveArtifacts artifacts: 'model.json,model_version.json,metrics.json,experiments.jsonl',
+                fingerprint: true
+            echo 'SUCCESS: MLOps pipeline, evaluation, and experiment tracking completed!'
         }
         failure {
             echo 'FAILED: Check Console Output.'
         }
     }
 }
+
