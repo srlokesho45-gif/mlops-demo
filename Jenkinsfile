@@ -54,6 +54,14 @@ pipeline {
             }
         }
 
+        
+       stage('Validate Model Release') {
+           steps {
+               sh 'python3 validate_release.py'
+               sh 'python3 -m unittest -v test_validate_release.py'
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t mlops-demo:v3 .'
